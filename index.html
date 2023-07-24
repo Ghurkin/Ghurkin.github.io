@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel=”preload” href=”/data/23184237.json” as=”fetch” type=”application/json” crossorigin fetchpriority="high">
+    <link rel=”preload” href=”/data/29054022.json” as=”fetch” type=”application/json” crossorigin fetchpriority="high">
+    <link rel=”preload” href=”/data/42178170.json” as=”fetch” type=”application/json” crossorigin fetchpriority="high">
+    <link rel="stylesheet" href="styles.css">
+    <title>Pickle Map</title>
+    <style>
+    </style>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script>
+        console.log("Pickle Tool Beta 1.4");
+    </script>
+</head>
+
+<body>
+    <!--
+    <div id="checkboxes">
+        <form name="input">
+            Zone I1: <input type="checkbox" name=zone value="i1" id="zind1">
+            Zone I2: <input type="checkbox" name=zone value="i2" id="zind2">
+            Zone I3: <input type="checkbox" name=zone value="i3" id="zind3">
+            Zone I4: <input type="checkbox" name=zone value="i4" id="zind4">
+            Zone I5: <input type="checkbox" name=zone value="i5" id="zind5">
+            Zone I6: <input type="checkbox" name=zone value="i6" id="zind6">
+            Zone I7: <input type="checkbox" name=zone value="i7" id="zind7">
+            Zone I8: <input type="checkbox" name=zone value="i8" id="zind8">
+            Zone I9: <input type="checkbox" name=zone value="i9" id="zind9">
+        </form>
+    </div>
+    -->
+    <div id="pickleMap"></div>
+    <script>
+        console.log(window.location.search.substring(1).replace(/zone=/g, '').split('&'));
+
+        let i = window.location.search.lastIndexOf('?');
+        let zones = window.location.search.substr(i + 1).replace(/zone=/g, '').split('&');
+        $('input[name="zone"]').prop('checked', function () {
+            return $.inArray(this.value, zones) !== -1;
+        });
+
+        const svg = d3.select("#pickleMap")
+            .append("svg")
+            .attr("width", window.innerWidth)
+            .attr("height", window.innerHeight)
+            //.style("margin-top", 50)
+            .call(d3.zoom().on("zoom", function () {
+                svg.attr("transform", d3.event.transform)
+            }).scaleExtent([0.15, 3]))
+            .append("g");
+
+        fetch("/data/29054022.json").then(function (response) {
+            return response.json();
+        }).then(function (originDat) {
+            for (let i = 0; i < originDat.originsystems.length; i++) {
+                svg
+                    .append("polygon")
+                    .attr("id", originDat.originsystems[i].id)
+                    .attr("points", originDat.originsystems[i].points)
+                    .attr("class", originDat.originsystems[i].class)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 2)
+                    .attr("fill", originDat.originsystems[i].fill)
+                    .attr("fill-opacity", "0.3");
+            }
+
+        });
+
+        console.log("Territory loaded");
+
+        fetch("/data/42178170.json").then(function (response) {
+            return response.json();
+        }).then(function (facborDat) {
+            for (let i = 0; i < facborDat.factionborders.length; i++) {
+                svg
+                    .append("polygon")
+                    .attr("id", facborDat.factionborders[i].id)
+                    .attr("points", facborDat.factionborders[i].points)
+                    .attr("class", facborDat.factionborders[i].class)
+                    .attr("stroke", facborDat.factionborders[i].color)
+                    .attr("stroke-width", 6)
+                    .attr("fill", facborDat.factionborders[i].color)
+                    .attr("fill-opacity", "0.2")
+                    .style("stroke-linejoin", "round");
+            }
+        });
+
+        console.log("Faction Zones loaded");
+
+        fetch("/data/431150160.json").then(function (response) {
+            return response.json();
+        }).then(function (zbdDat) {
+            for (let i = 0; i < zbdDat.zoneborders.length; i++) {
+                svg
+                    .append("polygon")
+                    .attr("id", zbdDat.zoneborders[i].id)
+                    .attr("points", zbdDat.zoneborders[i].points)
+                    .attr("class", zbdDat.zoneborders[i].class)
+                    .attr("stroke", zbdDat.zoneborders[i].color)
+                    .attr("stroke-width", 2)
+                    .attr("stroke-opacity", "0.4")
+                    .attr("fill", zbdDat.zoneborders[i].color)
+                    .attr("fill-opacity", "0.4");
+            };
+
+            for (let i = 0; i < zbdDat.zoneborders.length; i++) {
+                svg
+                    .append("text")
+                    .text(zbdDat.zoneborders[i].name)
+                    .attr("x", zbdDat.zoneborders[i].coordX)
+                    .attr("y", zbdDat.zoneborders[i].coordY)
+                    .attr("text-anchor", "right")
+                    .style("font-size", "50px")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", "0.5px")
+                    .attr("fill", zbdDat.zoneborders[i].color);
+            };
+
+            /*
+            let cbi1 = document.getElementById("zind1");
+            if (cbi1.checked == true) {
+                document.getElementById("searchi1").style.display = "none";
+            } else {
+                document.getElementById("searchi1").style.display = "block";
+            };
+
+            let cbi2 = document.getElementById("zind2");
+            if (cbi2.checked == true) {
+                document.getElementById("searchi2").style.display = "none";
+            } else {
+                document.getElementById("searchi2").style.display = "block";
+            };
+
+            let cbi3 = document.getElementById("zind3");
+            if (cbi3.checked == true) {
+                document.getElementById("searchi3").style.display = "none";
+            } else {
+                document.getElementById("searchi3").style.display = "block";
+            };
+
+            let cbi4 = document.getElementById("zind4");
+            if (cbi4.checked == true) {
+                document.getElementById("searchi4").style.display = "none";
+            } else {
+                document.getElementById("searchi4").style.display = "block";
+            };
+
+            let cbi5 = document.getElementById("zind5");
+            if (cbi3.checked == true) {
+                document.getElementById("searchi5").style.display = "none";
+            } else {
+                document.getElementById("searchi5").style.display = "block";
+            };
+
+            let cbi6 = document.getElementById("zind6");
+            if (cbi6.checked == true) {
+                document.getElementById("searchi6").style.display = "none";
+            } else {
+                document.getElementById("searchi6").style.display = "block";
+            };
+
+            let cbi7 = document.getElementById("zind7");
+            if (cbi7.checked == true) {
+                document.getElementById("searchi7").style.display = "none";
+            } else {
+                document.getElementById("searchi7").style.display = "block";
+            };
+
+            let cbi8 = document.getElementById("zind8");
+            if (cbi8.checked == true) {
+                document.getElementById("searchi8").style.display = "none";
+            } else {
+                document.getElementById("searchi8").style.display = "block";
+            };
+
+            let cbi9 = document.getElementById("zind9");
+            if (cbi9.checked == true) {
+                document.getElementById("searchi9").style.display = "none";
+            } else {
+                document.getElementById("searchi9").style.display = "block";
+            };
+            */
+
+        });
+
+        console.log("Search Zones loaded");
+
+        $(document).ready(function () {
+            fetch("/data/23184237.json").then(function (response) {
+                return response.json();
+            }).then(function (sysDat) {
+                for (let i = 0; i < sysDat.systems.length; i++) {
+                    svg
+                        .append("circle")
+                        .attr("id", sysDat.systems[i].id)
+                        .attr("cx", sysDat.systems[i].coordX)
+                        .attr("cy", sysDat.systems[i].coordY)
+                        .attr("r", 10)
+                        .attr("class", sysDat.systems[i].class);
+                }
+
+                for (let i = 0; i < sysDat.systems.length; i++) {
+                    svg
+                        .append("text")
+                        .text(sysDat.systems[i].name)
+                        .attr("x", sysDat.systems[i].coordX + 12)
+                        .attr("y", sysDat.systems[i].coordY - 18)
+                        .attr("class", "sys-text");
+                }
+                for (let i = 0; i < sysDat.systems.length; i++) {
+                    svg
+                        .append("line")
+                        .style("stroke", "white")
+                        .attr("x1", sysDat.systems[i].coordX)
+                        .attr("y1", sysDat.systems[i].coordY)
+                        .attr("x2", sysDat.systems[i].coordX)
+                        .attr("y2", sysDat.systems[i].coordY - 10);
+                }
+                for (let i = 0; i < sysDat.systems.length; i++) {
+                    svg
+                        .append("line")
+                        .style("stroke", "white")
+                        .attr("x1", sysDat.systems[i].coordX)
+                        .attr("y1", sysDat.systems[i].coordY - 10)
+                        .attr("x2", sysDat.systems[i].coordX + 10)
+                        .attr("y2", sysDat.systems[i].coordY - 18);
+                }
+            });
+        });
+
+        console.log("Systems Zones loaded");
+
+        svg
+                .append("text")
+                .text("WORK IN")
+                .attr("x", 300)
+                .attr("y", 300)
+                .attr("class", "wip-text")
+                .attr("fill-opacity", 0.8)
+                .style("stroke", "black");
+
+            svg
+                .append("text")
+                .text("PROGRESS")
+                .attr("x", 300)
+                .attr("y", 300 + 100)
+                .attr("class", "wip-text")
+                .attr("fill-opacity", 0.8)
+                .style("stroke", "black");
+
+            svg
+                .append("text")
+                .text("EU-184 Gurkensaft")
+                .attr("x", 300)
+                .attr("y", 300 + 180)
+                .attr("class", "wip-text-sm")
+                .attr("fill-opacity", 1)
+                .style("stroke", "black");
+    </script>
+</body>
+
+</html>
